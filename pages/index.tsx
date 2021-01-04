@@ -1,9 +1,15 @@
 import Head from 'next/head';
 import '../styles/Home.scss';
-import React, { useRef, useState, useMemo } from 'react';
+import dynamic from "next/dynamic";
+import React, { useRef, useState, useMemo, MutableRefObject } from 'react';
 import { Canvas, MeshProps, useFrame, useUpdate } from 'react-three-fiber';
 import * as THREE from "three";
 import type { BufferGeometry, Mesh } from 'three';
+import makeCamera from "../utils/makeCamera";
+
+const Lights = dynamic(() => import("../components/Lights"));
+const Ground = dynamic(() => import("../components/Lights"));
+const Tank = dynamic(() => import("../components/Tank"));
 
 interface SplineProps {
   curve: THREE.SplineCurve,
@@ -11,7 +17,7 @@ interface SplineProps {
 
 function SplineC({ curve }: SplineProps) {
 
-  const ref = useUpdate((bufferGeometry : BufferGeometry)  => {
+  const ref = useUpdate((bufferGeometry: BufferGeometry) => {
     bufferGeometry.setFromPoints(curve.getPoints(50))
   }, [curve]);
   return (
@@ -41,10 +47,21 @@ export default function Home() {
     () => new THREE.SplineCurve(points.map((v) => new THREE.Vector2(...v))),
     [points]
   );
+  
+  const [targetRef, setTargetRef] = useState();
+
+  const TankCameraFov = 75;
+  const tankCamera = makeCamera(TankCameraFov);
 
   return (
     <div className="container">
-      <Canvas className="c">
+      <Canvas
+        shadowMap
+        camera={{ position: [0, 15, 25], fov: 90 }}
+        className="c">
+        <Lights />
+        <Ground />
+        <Tank targetRef={targetRef} />
         <SplineC
           curve={curve}
         />
