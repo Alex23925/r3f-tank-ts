@@ -3,7 +3,7 @@ import { Canvas, useThree, useFrame } from "react-three-fiber";
 import { FunctionComponent, ReactNode, useEffect, useRef, useState, useMemo, Dispatch, MutableRefObject } from "react";
 import * as THREE from "three";
 import makeCamera from "../utils/makeCamera";
-import type { Mesh, Object3D } from 'three';
+import type { Mesh, Geometry, BufferGeometry, Material, Object3D } from 'three';
 import getTargetRef from "./Target";
 
 const targetPosition = new THREE.Vector3();
@@ -16,7 +16,7 @@ interface TnkProps {
 
 interface TurretPivotProps {
     children: ReactNode;
-    setTurretPivRef: Dispatch<ReactNode>;
+    setTurretPivRef: Dispatch<MutableRefObject<Mesh>>;
 }
 
 interface TankProps {
@@ -56,20 +56,9 @@ const Tnk: FunctionComponent<TnkProps> = ({ children }) => {
     return <object3D ref={tankRef}>{children}</object3D>;
 };
 
-const TurretPivot = ({ setTurretPivRef, children }: TurretPivotProps) => {
-    const objRef = useRef();
-    setTurretPivRef(objRef);
-
-    return (
-        <object3D ref={objRef} position-y={0.5} scale={[5, 5, 5]}>
-            {children}
-        </object3D>
-    );
-};
-
 export default function Tank({ targetRef }: TankProps) {
-    const [turretPivRef, setTurretPivRef] = useState<MutableRefObject<Mesh>>();
-
+    
+    const turretPivRef = useRef<Mesh>();
     const bodyRef = useRef<Mesh>();
     const wheelRefs = [useRef<Mesh>(), useRef<Mesh>(), useRef<Mesh>(), useRef<Mesh>(), useRef<Mesh>(), useRef<Mesh>(),];
 
@@ -83,6 +72,34 @@ export default function Tank({ targetRef }: TankProps) {
     tankCamera.position.y = 3;
     tankCamera.position.z = -6;
     tankCamera.rotation.y = Math.PI;
+
+    // TURRET
+    const turretWidth = 0.1;
+    const turretHeight = 0.1;
+    const turretLength = carLength * 0.75 * 0.2;
+    const turretGeo = (
+        <boxBufferGeometry args={[turretWidth, turretHeight, turretLength]} />
+    );
+    const turretMat = <meshPhongMaterial color={0x6688aa} />;
+
+    const turretCamera = makeCamera();
+    turretCamera.position.y = 0.75 * 0.2;
+
+    const turretMesh = (
+        <mesh
+            camera={turretCamera}
+            castShadow={true}
+            position-z={turretLength * 0.5}
+        >
+            {turretGeo}
+            {turretMat}
+        </mesh>
+    );
+
+    const TurretPivot = 
+        <object3D ref={turretPivRef} position-y={0.5} scale={[5, 5, 5]}>
+            {turretMesh}
+        </object3D>
 
     // WHEELS
     const wheelRadius = 1;
@@ -109,7 +126,7 @@ export default function Tank({ targetRef }: TankProps) {
         const mesh = (
             <mesh
                 ref={wheelRefs[c]}
-                position={[...position]}
+                position={[position[0], position[1], position[2]]}
                 rotation-z={Math.PI * 0.5}
                 castShadow={true}
             >
@@ -131,7 +148,7 @@ export default function Tank({ targetRef }: TankProps) {
         if (targetRef?.current) {
             targetRef.current.getWorldPosition(targetPosition);
         }
-        if (turretPivRef) {
+        if (turretPivRef?.current) {
             turretPivRef.current.lookAt(targetPosition);
         }
     });
@@ -165,29 +182,6 @@ export default function Tank({ targetRef }: TankProps) {
         </mesh>
     );
 
-    // TURRET
-    const turretWidth = 0.1;
-    const turretHeight = 0.1;
-    const turretLength = carLength * 0.75 * 0.2;
-    const turretGeo = (
-        <boxBufferGeometry args={[turretWidth, turretHeight, turretLength]} />
-    );
-    const turretMat = <meshPhongMaterial color={0x6688aa} />;
-
-    const turretCamera = makeCamera();
-    turretCamera.position.y = 0.75 * 0.2;
-
-    const turretMesh = (
-        <mesh
-            camera={turretCamera}
-            castShadow={true}
-            position-z={turretLength * 0.5}
-        >
-            {turretGeo}
-            {turretMat}
-        </mesh>
-    );
-
     return (
         <Tnk>
             <mesh
@@ -200,7 +194,7 @@ export default function Tank({ targetRef }: TankProps) {
                 <meshPhongMaterial color={0x6688aa} />
                 {domMesh}
                 {wheelMeshes}
-                <TurretPivot setTurretPivRef={setTurretPivRef}>{turretMesh}</TurretPivot>
+                {TurretPivot}
             </mesh>
         </Tnk>
     );

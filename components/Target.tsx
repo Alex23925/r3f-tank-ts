@@ -1,55 +1,69 @@
 import dynamic from "next/dynamic";
 import { Canvas, useThree, useFrame } from "react-three-fiber";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, ReactNode } from "react";
 import * as THREE from "three";
+import type { Mesh, Geometry, BufferGeometry,MeshLambertMaterial, Material, Object3D } from 'three';
 import makeCamera from "../utils/makeCamera";
+import { Pass } from "three/examples/jsm/postprocessing/Pass";
+
+interface PassingNodesProps {
+    children: ReactNode;
+}
 
 export function getTargetRef(trgtRef) {
     return trgtRef;
 }
 
-const TargetOrbit = ({ children }) => {
-    const objRef = useRef();
+const TargetOrbit = ({ children } : PassingNodesProps) => {
+    const objRef = useRef<Mesh>();
     useFrame((state) => {
         let time = state.clock.getElapsedTime();
-        objRef.current.rotation.y = time * 0.27;
+        if(objRef?.current) {
+            objRef.current.rotation.y = time * 0.27;
+        }
     });
     return <object3D ref={objRef}>{children}</object3D>;
 };
 
-const TargetElevation = ({ children }) => {
+const TargetElevation = ({ children } : PassingNodesProps) => {
     return <object3D>{children}</object3D>;
 };
 
-const TargetBob = ({ children }) => {
-    const objRef = useRef();
+const TargetBob = ({ children } : PassingNodesProps) => {
+    const objRef = useRef<Object3D>();
 
     useFrame((state) => {
         let time = state.clock.getElapsedTime();
-        objRef.current.position.y = Math.sin(time * 2) * 2;
+        if(objRef?.current){
+            objRef.current.position.y = Math.sin(time * 2) * 2;
+        }
     });
 
     return <object3D ref={objRef}>{children}</object3D>;
 };
 
-const TrgtCameraPivot = ({ children }) => {
+const TrgtCameraPivot = ({ children } : PassingNodesProps) => {
     return <object3D>{children}</object3D>;
 };
 
 export default function Target(props) {
     const carLength = 8;
 
-    const meshRef = useRef();
+    const meshRef = useRef<Mesh>();
     props.setTargetRef(meshRef);
-    const matRef = useRef();
+    const matRef = useRef<MeshLambertMaterial>();
 
     useFrame((state) => {
         let time = state.clock.getElapsedTime();
-        meshRef.current.rotation.x = time * 7;
-        meshRef.current.rotation.y = time * 13;
+        if(meshRef?.current){
+            meshRef.current.rotation.x = time * 7;
+            meshRef.current.rotation.y = time * 13;
+        }
 
-        matRef.current.emissive.setHSL((time * 10) % 1, 1, 0.25);
-        matRef.current.color.setHSL((time * 10) % 1, 1, 0.25);
+        if(matRef?.current){
+         matRef.current.emissive.setHSL((time * 10) % 1, 1, 0.25);
+         matRef.current.color.setHSL((time * 10) % 1, 1, 0.25);
+        }
     });
     const targetGeo = <sphereBufferGeometry args={[0.5, 6, 3]} />;
     const targetMat = (
