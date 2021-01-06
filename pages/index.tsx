@@ -70,7 +70,7 @@ export default function Home() {
     <div className="container">
       <Canvas
         shadowMap
-        camera={{ position: [0, 15, 35], fov: 90 }}
+        camera={{ position: [-10, 10, 25], fov: 90 }}
         className="c">
         <Lights />
         <Ground />

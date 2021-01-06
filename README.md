@@ -1,8 +1,10 @@
-This repo is for me to accustom to typescript, react, and react three fiber all at the same time by converting my orginal r3f tank with typescript instead.
+# Heading 1
+
+This repo is for me to accustom to typescript, react, and react three fiber all at the same time by converting my original r3f tank with typescript instead.
 
 ## Intro
 
-This project is from the threejs fundamentals scene graph page [https://threejsfundamentals.org/threejs/lessons/threejs-scenegraph.html] that I implented with react three fiber, react and now typescript.
+This project is from the threejs fundamentals scene graph page [https://threejsfundamentals.org/threejs/lessons/threejs-scenegraph.html] that I created with react three fiber, react and now typescript.
 
 ## Getting Started
 
@@ -20,7 +22,7 @@ You can start editing the page by modifying `pages/index.js`. The page auto-upda
 
 ## Reason for doing this
 
-To learn how to use typescript react and react three fiber at the same time. 
+To learn how to use typescript react and react three fiber at the same time.
 
 ## Problems encountered after finishing
 
