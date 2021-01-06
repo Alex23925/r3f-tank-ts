@@ -6,13 +6,19 @@ import { Canvas, MeshProps, useFrame, useUpdate } from 'react-three-fiber';
 import * as THREE from "three";
 import type { BufferGeometry, Mesh } from 'three';
 import makeCamera from "../utils/makeCamera";
+import { type } from 'os';
 
 const Lights = dynamic(() => import("../components/Lights"));
-const Ground = dynamic(() => import("../components/Lights"));
+const Ground = dynamic(() => import("../components/Ground"));
 const Tank = dynamic(() => import("../components/Tank"));
+const Target = dynamic(() => import("../components/Target"));
 
 interface SplineProps {
   curve: THREE.SplineCurve,
+}
+
+interface setTRefFunc {
+  (tRef: MutableRefObject<Mesh>): void;
 }
 
 function SplineC({ curve }: SplineProps) {
@@ -48,7 +54,14 @@ export default function Home() {
     [points]
   );
   
-  const [targetRef, setTargetRef] = useState();
+  const [targetRef, setTargetRef] = useState<MutableRefObject<Mesh>>();
+
+  let tRef = useRef<Mesh>();
+
+  let setTurretRef : setTRefFunc;
+  setTurretRef = function (meshRef) {
+    tRef = meshRef;
+  }
 
   const TankCameraFov = 75;
   const tankCamera = makeCamera(TankCameraFov);
@@ -57,11 +70,12 @@ export default function Home() {
     <div className="container">
       <Canvas
         shadowMap
-        camera={{ position: [0, 15, 25], fov: 90 }}
+        camera={{ position: [0, 15, 35], fov: 90 }}
         className="c">
         <Lights />
         <Ground />
         <Tank targetRef={targetRef} />
+        <Target setTargetRef={setTargetRef} tRef={tRef} />
         <SplineC
           curve={curve}
         />

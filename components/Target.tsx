@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { Canvas, useThree, useFrame } from "react-three-fiber";
-import { useEffect, useRef, useState, useMemo, ReactNode } from "react";
+import { useEffect, useRef, useState, useMemo, ReactNode, Dispatch, MutableRefObject } from "react";
 import * as THREE from "three";
 import type { Mesh, Geometry, BufferGeometry,MeshLambertMaterial, Material, Object3D } from 'three';
 import makeCamera from "../utils/makeCamera";
@@ -10,8 +10,15 @@ interface PassingNodesProps {
     children: ReactNode;
 }
 
-export function getTargetRef(trgtRef) {
-    return trgtRef;
+interface TargetCameraPivotProps {
+    children: ReactNode;
+    camera: THREE.PerspectiveCamera;
+}
+
+interface TargetProps {
+    // setTargetRef: Dispatch<MutableRefObject<Mesh>>;
+    setTargetRef: Function;
+    tRef: MutableRefObject<Mesh | undefined>
 }
 
 const TargetOrbit = ({ children } : PassingNodesProps) => {
@@ -42,15 +49,21 @@ const TargetBob = ({ children } : PassingNodesProps) => {
     return <object3D ref={objRef}>{children}</object3D>;
 };
 
-const TrgtCameraPivot = ({ children } : PassingNodesProps) => {
-    return <object3D>{children}</object3D>;
-};
+// const TrgtCameraPivot = ({ camera} : TargetCameraPivotProps) => {
+//     return <object3D>{children}</object3D>;
+// };
 
-export default function Target(props) {
+export default function Target({setTargetRef, tRef} : TargetProps) {
     const carLength = 8;
 
     const meshRef = useRef<Mesh>();
-    props.setTargetRef(meshRef);
+
+    setTargetRef(meshRef);
+    // Argument of type 'MutableRefObject<Mesh<Geometry | BufferGeometry, Material | Material[]> | undefined>' is not assignable to parameter of type 'MutableRefObject<Mesh<Geometry | BufferGeometry, Material | Material[]>>'.
+    // Type 'Mesh<Geometry | BufferGeometry, Material | Material[]> | undefined' is not assignable to type 'Mesh<Geometry | BufferGeometry, Material | Material[]>'.
+    //     Type 'undefined' is not assignable to type 'Mesh<Geometry | BufferGeometry, Material | Material[]>'
+    tRef = meshRef;
+
     const matRef = useRef<MeshLambertMaterial>();
 
     useFrame((state) => {
@@ -86,7 +99,7 @@ export default function Target(props) {
             <TargetOrbit>
                 <TargetElevation>
                     <TargetBob>
-                        <TrgtCameraPivot camera={targetCamera} />
+                        {/* <TrgtCameraPivot camera={targetCamera} /> */}
                         {targetMesh}
                     </TargetBob>
                 </TargetElevation>
